@@ -53,7 +53,13 @@ impl Log for Logger {
 /// ``LOG_LEVEL=trace cargo run``
 pub fn init() {
     static LOGGER: Logger = Logger;
-    log::set_logger(&LOGGER).unwrap();
+    match log::set_logger(&LOGGER) {
+        Ok(_) => {}
+        Err(e) => {
+            println!("Failed to set logger: {}", e);
+            return;
+        }
+    }
     log::set_max_level(match option_env!("LOG_LEVEL") {
         Some("error") => LevelFilter::Error,
         Some("warn") => LevelFilter::Warn,

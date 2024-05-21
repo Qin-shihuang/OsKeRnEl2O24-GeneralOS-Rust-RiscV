@@ -6,14 +6,16 @@
 
 extern crate alloc;
 
-use core::arch::asm;
+use core::ptr::{addr_of, addr_of_mut, write_bytes};
 use log::info;
 
 pub use sbi::legacy::sbi_shutdown as shutdown;
 
-#[cfg(feature= "board_qemu")]
-#[path ="board/qemu.rs"]
+mod arch;
+#[cfg(feature = "board_qemu")]
+#[path = "board/qemu.rs"]
 mod board;
+mod boot;
 mod config;
 mod console;
 mod logging;
@@ -21,31 +23,16 @@ mod macros;
 mod mm;
 mod panic;
 
-#[naked]
-#[no_mangle]
-#[link_section = ".text.entry"]
-unsafe extern "C" fn _entry() -> ! {
-    const KERNEL_STACK_SIZE: usize = 0x10000;
 
-    #[link_section = ".bss.stack"]
-    static mut STACK: [u8; KERNEL_STACK_SIZE] = [0; KERNEL_STACK_SIZE];
-
-    asm!(
-        "la     sp, {stack} + {stzck_size}",
-        "call   kernel_init",
-        stack      = sym STACK,
-        stzck_size = const KERNEL_STACK_SIZE,
-        options(noreturn)
-    )
-}
 
 #[no_mangle]
 extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
+    clear_bss();
     logging::init();
     display_banner();
     info!("GeneralOS-Rust-RiscV srarted in hart_id: {}", hart_id);
     mm::init();
-    shutdown()
+    panic!()
 }
 
 fn display_banner() {
@@ -71,3 +58,19 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|     |_|"""""|_|"""""|_|"""""|_|"""""|_| """"|
 "#;
     print!("{}", BANNER);
 }
+
+fn clear_bss() {
+    extern "C" {
+        static mut __bss_start: u8;
+        static mut __bss_end: u8;
+    }
+
+    unsafe {
+        write_bytes(
+            addr_of_mut!(__bss_start),
+            0,
+            addr_of!(__bss_end) as usize - addr_of!(__bss_start) as usize,
+        );
+    }
+}
+

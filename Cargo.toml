@@ -1,5 +1,7 @@
 [workspace]
 resolver = "2"
-members = [ 
-    "kernel", "sbi",
+members = [
+    "kernel",
+    "crates/allocator",
+    "crates/sbi"
 ]

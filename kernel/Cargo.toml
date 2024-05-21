@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["Qin-shihuang <0.0@owo.li>"]
 
 [dependencies]
-sbi = { path = "../sbi" }
+allocator = { path = "../crates/allocator" }
+sbi = { path = "../crates/sbi" }
 
 log = "0"

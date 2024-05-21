@@ -4,8 +4,6 @@
 #![feature(panic_info_message)]
 #![feature(naked_functions)]
 
-
-
 use core::arch::asm;
 
 use log::info;
@@ -27,7 +25,7 @@ unsafe extern "C" fn _entry() -> ! {
     asm!(
         "la     sp, {stack} + {stzck_size}",
         "call   kernel_init",
-        stack = sym STACK,
+        stack      = sym STACK,
         stzck_size = const KERNEL_STACK_SIZE,
         options(noreturn)
     )
@@ -37,7 +35,7 @@ unsafe extern "C" fn _entry() -> ! {
 extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
     logging::init();
     display_banner();
-    info!("MOS-Rust-RISCV srarted in hart_id: {}", hart_id);
+    info!("MOS-Rust-RiscV srarted in hart_id: {}", hart_id);
     shutdown()
 }
 

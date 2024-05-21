@@ -9,3 +9,24 @@ allocator = { path = "../crates/allocator" }
 sbi = { path = "../crates/sbi" }
 
 log = "0"
+lazy_static = { version = "1", features = ["spin_no_std"] }
+spin = "0"
+
+
+[features]
+default = ["board_qemu"]
+board_qemu = []
+
+[profile.dev]
+opt-level = 1
+debug = true
+debug-assertions = false
+overflow-checks = false
+lto = false
+panic = 'unwind'
+incremental = false
+codegen-units = 16
+rpath = false
+
+[profile.release]
+lto = true

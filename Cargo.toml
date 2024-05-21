@@ -3,5 +3,6 @@ resolver = "2"
 members = [
     "kernel",
     "crates/allocator",
-    "crates/sbi"
+    "crates/sbi",
+    "crates/platform"
 ]

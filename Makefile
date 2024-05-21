@@ -18,8 +18,18 @@ run: all
     -device loader,file=kernel-qemu,addr=0x80200000 \
     -kernel kernel-qemu \
     -nographic \
-    -smp 4 -m 2G
+    -smp 4 -m 256M
 
+debug: all
+	@qemu-system-riscv64 \
+    -machine virt \
+    -bios default \
+    -device loader,file=kernel-qemu,addr=0x80200000 \
+    -kernel kernel-qemu \
+    -nographic \
+    -smp 4 -m 256M \
+    -s -S
+    
 clean:
 	@rm kernel-qemu
 	@rm $(KERNEL_FILE)

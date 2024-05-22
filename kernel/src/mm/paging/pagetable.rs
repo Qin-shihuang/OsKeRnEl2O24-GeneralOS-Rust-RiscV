@@ -45,7 +45,6 @@ pub fn map_kernel_phys_seg() {
     for i in (0..PHYSICAL_MEMORY_END).step_by(HUGE_PAGE_SIZE) {
         let pa: usize = i + PHYSICAL_MEMORY_START;
         let va = VirtAddr::from(i + K_SEG_PHY_MEM_BEG);
-        trace!("p3 index: {}", va.p3_index());
         boot_pagetable[va.p3_index()] = (pa >> 2) | 0xcf;
     }
 }

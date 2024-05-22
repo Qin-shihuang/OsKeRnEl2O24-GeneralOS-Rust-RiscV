@@ -25,7 +25,7 @@ impl<const ORDER: usize> Heap<ORDER> {
         // align start and end
         start = (start + size_of::<usize>() - 1) & (!size_of::<usize>() + 1);
         end &= !size_of::<usize>() + 1;
-        assert!(start <= end);
+        debug_assert!(start <= end);
         let mut total = 0;
         while start + size_of::<usize>() <= end {
             // This ensures the memory is aligned.

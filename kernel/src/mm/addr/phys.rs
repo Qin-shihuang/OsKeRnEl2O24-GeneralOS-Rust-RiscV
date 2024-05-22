@@ -1,12 +1,7 @@
 use core::{fmt::{self, Display}, ops::{Add, AddAssign, Sub, SubAssign}};
 
 
-use crate::{mask, round_up};
-
-use super::{PAGE_SIZE, PAGE_SIZE_BITS};
-
-const PA_WIDTH: usize = 56;
-
+use crate::{mask, mm::consts::{PAGE_SIZE, PAGE_SIZE_BITS, PA_WIDTH}, round_up};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PhysAddr(pub usize);
@@ -40,18 +35,6 @@ impl SubAssign<usize> for PhysAddr {
 impl Display for PhysAddr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "PA(0x{:x})", self.0)
-    }
-}
-
-impl From<usize> for PhysAddr {
-    fn from(addr: usize) -> Self {
-        Self(addr & mask!(PA_WIDTH))
-    }
-}
-
-impl From<PhysAddr> for usize {
-    fn from(addr: PhysAddr) -> Self {
-        addr.0
     }
 }
 
@@ -120,26 +103,30 @@ impl Display for PhysPageNum {
     }
 }
 
-impl From<usize> for PhysPageNum {
-    fn from(addr: usize) -> Self {
-        Self(addr >> 12)
+impl const From<PhysAddr> for usize {
+    fn from(v: PhysAddr) -> Self {
+        v.0
+    }
+}
+impl const From<usize> for PhysAddr {
+    fn from(v: usize) -> Self {
+        Self(v & mask!(PA_WIDTH))
     }
 }
 
-impl From<PhysPageNum> for usize {
-    fn from(ppn: PhysPageNum) -> Self {
-        ppn.0 << 12
+impl const From<PhysAddr> for PhysPageNum {
+    fn from(v: PhysAddr) -> Self {
+        v.floor_page()
+    }
+}
+impl const From<PhysPageNum> for PhysAddr {
+    fn from(v: PhysPageNum) -> Self {
+        Self(v.0 << PAGE_SIZE_BITS)
     }
 }
 
-impl From<PhysPageNum> for PhysAddr {
-    fn from(ppn: PhysPageNum) -> Self {
-        Self(ppn.0 << 12)
-    }
-}
-
-impl From<PhysAddr> for PhysPageNum {
-    fn from(addr: PhysAddr) -> Self {
-        Self(addr.0 >> 12)
+impl const From<PhysPageNum> for usize {
+    fn from(v: PhysPageNum) -> Self {
+        v.0
     }
 }

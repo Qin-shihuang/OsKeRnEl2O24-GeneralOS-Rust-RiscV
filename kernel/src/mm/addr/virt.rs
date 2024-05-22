@@ -1,11 +1,6 @@
 use core::{fmt::{self, Display}, ops::{Add, AddAssign, Sub, SubAssign}};
 
-use crate::{mask, round_up};
-
-use super::{PAGE_SIZE, PAGE_SIZE_BITS};
-
-
-const VA_WIDTH: usize = 64;
+use crate::{mask, mm::consts::{PAGE_SIZE, PAGE_SIZE_BITS, VA_WIDTH}, round_up};
 
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -40,18 +35,6 @@ impl SubAssign<usize> for VirtAddr {
 impl Display for VirtAddr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "VA(0x{:x})", self.0)
-    }
-}
-
-impl From<usize> for VirtAddr {
-    fn from(addr: usize) -> Self {
-        Self(addr & mask!(VA_WIDTH))
-    }
-}
-
-impl From<VirtAddr> for usize {
-    fn from(addr: VirtAddr) -> Self {
-        addr.0
     }
 }
 
@@ -121,26 +104,30 @@ impl Display for VirtPageNum {
     }
 }
 
-impl From<usize> for VirtPageNum {
-    fn from(addr: usize) -> Self {
-        Self(addr & mask!(VA_WIDTH - 12))
+impl const From<VirtAddr> for usize {
+    fn from(v: VirtAddr) -> Self {
+        v.0
+    }
+}
+impl const From<usize> for VirtAddr {
+    fn from(v: usize) -> Self {
+        Self(v & mask!(VA_WIDTH))
     }
 }
 
-impl From<VirtPageNum> for usize {
-    fn from(addr: VirtPageNum) -> Self {
-        addr.0
+impl const From<VirtAddr> for VirtPageNum {
+    fn from(v: VirtAddr) -> Self {
+        v.floor_page()
+    }
+}
+impl const From<VirtPageNum> for VirtAddr {
+    fn from(v: VirtPageNum) -> Self {
+        Self(v.0 << PAGE_SIZE_BITS)
     }
 }
 
-impl From<VirtPageNum> for VirtAddr {
-    fn from(addr: VirtPageNum) -> Self {
-        Self(addr.0 << 12)
-    }
-}
-
-impl From<VirtAddr> for VirtPageNum {
-    fn from(addr: VirtAddr) -> Self {
-        Self(addr.0 >> 12)
+impl const From<VirtPageNum> for usize {
+    fn from(v: VirtPageNum) -> Self {
+        v.0
     }
 }

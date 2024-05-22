@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(alloc_error_handler)]
 #![feature(asm_const)]
+#![feature(const_trait_impl)]
 #![feature(panic_info_message)]
 #![feature(naked_functions)]
 

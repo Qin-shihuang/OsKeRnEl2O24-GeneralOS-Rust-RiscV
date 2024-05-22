@@ -1,3 +1,5 @@
+// Adapted from Mankoros
+
 #![allow(dead_code)]
 use core::arch::asm;
 

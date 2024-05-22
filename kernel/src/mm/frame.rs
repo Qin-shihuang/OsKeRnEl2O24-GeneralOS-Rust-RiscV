@@ -2,12 +2,12 @@
 
 use alloc::vec::Vec;
 use lazy_static::lazy_static;
-use log::info;
+use log::{info, warn};
 use spin::Mutex;
 
 use crate::{prev_pow_of_2, print, println};
 
-use super::addr::{PhysAddr, PhysPageNum, PAGE_SIZE};
+use super::{addr::{PhysAddr, PhysPageNum}, consts::FRAME_SIZE};
 
 const ORDER: usize = 32;
 
@@ -122,19 +122,9 @@ impl<const ORDER: usize> FrameAllocator<ORDER> {
     }
 }
 
-pub struct Frame {
-    pub ppn: PhysPageNum,
-}
-
-impl Frame {
-    fn start_address(&self) -> PhysAddr {
-        PhysAddr::from(self.ppn)
-    }
-}
-
-unsafe fn clear_frame(frame: &Frame, size: usize) {
-    let ptr = frame.start_address().0 as *mut u8;
-    ptr.write_bytes(0, PAGE_SIZE * size);
+unsafe fn clear_frame(frame: PhysPageNum, size: usize) {
+    let ptr = PhysAddr::from(frame).as_mut_ptr::<u8>();
+    ptr.write_bytes(0, FRAME_SIZE * size);
 }
 
 pub fn debug_print() {
@@ -149,15 +139,16 @@ pub fn init(start: PhysAddr, end: PhysAddr) {
     );
 }
 
-pub fn alloc_frames(size: usize, align: usize) -> Option<Frame> {
+pub fn alloc_frames(size: usize, align: usize) -> Option<PhysPageNum> {
     let frame = FRAME_ALLOCATOR
         .lock()
-        .alloc(size, align)
-        .map(|ppn| Frame { ppn });
-    if let Some(ref frame) = frame {
+        .alloc(size, align);
+    if let Some(frame) = frame {
         unsafe {
             clear_frame(frame, size);
         }
+    } else {
+        warn!("Failed to allocate {} frames with alignment {}.", size, align);
     }
     frame
 }

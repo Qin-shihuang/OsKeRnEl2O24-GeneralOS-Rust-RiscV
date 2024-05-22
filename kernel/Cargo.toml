@@ -8,6 +8,7 @@ authors = ["Qin-shihuang <0.0@owo.li>"]
 allocator = { path = "../crates/allocator" }
 sbi = { path = "../crates/sbi" }
 
+bitflags = "2"
 log = "0"
 lazy_static = { version = "1", features = ["spin_no_std"] }
 spin = "0"
@@ -18,9 +19,8 @@ default = ["board_qemu"]
 board_qemu = []
 
 [profile.dev]
-opt-level = 1
+opt-level = 0
 debug = true
-debug-assertions = false
 overflow-checks = false
 lto = false
 panic = 'unwind'

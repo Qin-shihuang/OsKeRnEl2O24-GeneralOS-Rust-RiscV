@@ -8,6 +8,7 @@ use crate::config::PHYSICAL_MEMORY_END;
 use self::addr::{kva2pa, PhysAddr, VirtAddr};
 
 pub mod addr;
+pub mod consts;
 mod frame;
 mod heap;
 pub mod layout;

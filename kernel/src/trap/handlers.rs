@@ -1,8 +1,9 @@
 use core::arch::global_asm;
 
+use log::debug;
 use riscv::register::{scause::{Exception, Interrupt, Scause, Trap}, sie, stvec};
 
-use crate::{println, timer};
+use crate::timer;
 
 use super::context::Context;
 
@@ -29,7 +30,7 @@ pub fn handle_trap(context: &mut Context, scause: Scause, stval: usize) {
 }
 
 fn breakpoint(context: &mut Context) {
-    println!("Breakpoint at {:#x}", context.sepc);
+    debug!("Breakpoint at {:#x}", context.sepc);
     context.sepc += 2;
 }
 
@@ -38,6 +39,5 @@ fn supervisor_timer() {
 }
 
 fn unimplemented_trap(scause: Scause, context: &mut Context, stval: usize) {
-    println!("unimplemented trap: {:?}, stval: {:#x}, sepc: {:#x}", scause.cause(), stval, context.sepc);
-    panic!("unimplemented trap");
+    panic!("unimplemented trap: {:?}, stval: {:#x}, sepc: {:#x}", scause.cause(), stval, context.sepc);
 }

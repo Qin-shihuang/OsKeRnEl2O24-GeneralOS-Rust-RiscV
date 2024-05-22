@@ -73,3 +73,10 @@ pub fn switch_page_table(pa: usize) -> usize {
     trace!("Switched to pagetable: 0x{:x}", pa);
     old_page_table_ptr.ppn() << PAGE_SIZE_BITS
 }
+
+#[inline]
+pub fn wfi() {
+    unsafe {
+        asm!("wfi");
+    }
+}

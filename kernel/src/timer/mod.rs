@@ -1,26 +1,13 @@
+mod consts;
+
 use log::info;
 use riscv::register::{sie, sstatus, time};
 use sbi::legacy::sbi_set_timer;
 
-use crate::board::CLOCK_FREQ;
+use self::consts::{CLOCK_FREQ, INTERRUPT_PER_SEC};
 
-const INTERVAL: usize = CLOCK_FREQ / 100;
 
-#[inline]
-pub fn set_next_timeout() {
-    sbi_set_timer((time::read() + INTERVAL) as u64);
-}
-
-pub fn tick() {
-    static mut TICKS: usize = 0;
-    unsafe {
-        TICKS += 1;
-        if TICKS % 100 == 0 {
-            log::info!("{} ticks passed.", TICKS);
-        }
-    }
-    set_next_timeout();
-}
+static mut TICKS: usize = 0;
 
 pub fn init() {
     unsafe {
@@ -29,4 +16,34 @@ pub fn init() {
     }
     set_next_timeout();
     info!("timer initialized.");
+}
+
+pub fn set_next_timeout() {
+    sbi_set_timer(get_next_int_time());
+}
+
+fn get_next_int_time() -> u64 {
+    (time::read() + CLOCK_FREQ / INTERRUPT_PER_SEC) as u64
+}
+
+pub fn get_ticks() -> usize {
+    unsafe { TICKS }
+}
+
+pub fn get_time_sec() -> usize {
+    get_ticks() / INTERRUPT_PER_SEC
+}
+
+pub fn get_time_usec() -> usize {
+    get_ticks() % INTERRUPT_PER_SEC * (consts::USEC_PER_SEC / INTERRUPT_PER_SEC)
+}
+
+pub fn tick() {
+    set_next_timeout();
+    unsafe {
+        TICKS += 1;
+        if TICKS % INTERRUPT_PER_SEC == 0 {
+            info!("{} seconds passed.", get_time_sec());
+        }
+    }
 }

@@ -40,7 +40,9 @@ extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
     mm::init();
     trap::init();
     timer::init();
-    loop {}
+    loop {
+        arch::wfi();
+    }
 }
 
 fn display_banner() {

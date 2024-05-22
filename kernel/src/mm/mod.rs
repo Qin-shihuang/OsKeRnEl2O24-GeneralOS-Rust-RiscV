@@ -1,9 +1,9 @@
 use core::ptr::addr_of;
 
 use alloc::vec::Vec;
-use log::debug;
+use log::{debug, info};
 
-use crate::config::PHYSICAL_MEMORY_END;
+use crate::config::{PHYSICAL_MEMORY_END, PHYSICAL_MEMORY_START};
 
 use self::addr::{kva2pa, PhysAddr, VirtAddr};
 
@@ -25,7 +25,10 @@ pub fn init() {
         kva2pa(VirtAddr(unsafe { addr_of!(__kernel_end) as usize })),
         PhysAddr(PHYSICAL_MEMORY_END),
     );
-    frame::debug_print();
+    layout::print_memory_layout();
+    paging::pagetable::map_kernel_phys_seg();
+    info!("Physical memory mapped at 0x{:x}", PHYSICAL_MEMORY_START);
+
 }
 
 fn test_heap() {

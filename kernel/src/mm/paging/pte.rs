@@ -4,11 +4,11 @@ use core::fmt;
 
 use bitflags::bitflags;
 
-use crate::mm::{addr::{PhysAddr, PhysPageNum, VirtAddr}, consts::PTE_PPN_MASK, frame};
+use crate::mm::{addr::{PhysAddr, PhysPageNum}, consts::PTE_PPN_MASK, frame};
 
 const PTEFLAGS_MASK: usize = 0x3FF;
 bitflags! {
-    #[derive(Debug)]
+    #[derive(Clone, Copy, Debug)]
     pub struct PteFlags: u16 {
         /// Valid
         const V = 1 << 0;
@@ -147,13 +147,13 @@ impl PageTableEntry {
     pub fn alloc_non_leaf(&mut self, perm: PteFlags) {
         debug_assert!(!self.is_valid(), "try alloc to a valid pte");
         debug_assert!(!perm.intersects(PteFlags::U | PteFlags::R | PteFlags::W));
-        let frame = frame::alloc_frames(1, 1).unwrap();
+        let frame = frame::alloc().unwrap();
         *self = Self::new(frame.into(), perm | PteFlags::V);
     }
 
     pub fn alloc(&mut self, perm: PteFlags) {
         debug_assert!(!self.is_valid(), "try alloc to a valid pte");
-        let frame = frame::alloc_frames(1, 1).unwrap();
+        let frame = frame::alloc().unwrap();
         *self = Self::new(frame.into(), perm | PteFlags::V | PteFlags::A | PteFlags::D);
     }
 
@@ -164,13 +164,13 @@ impl PageTableEntry {
 
     pub unsafe fn dealloc(&mut self) {
         debug_assert!(self.is_valid(), "try dealloc an invalid pte");
-        frame::dealloc_frames(self.ppn(), 1);
+        frame::dealloc(self.ppn());
         self.clear();
     }
 
     pub unsafe fn dealloc_non_leaf(&mut self) {
         debug_assert!(self.is_directory(), "try dealloc a leaf pte");
-        frame::dealloc_frames(self.ppn(), 1);
+        frame::dealloc(self.ppn());
         self.clear();
     }
 }

@@ -11,6 +11,7 @@ sbi = { path = "../crates/sbi" }
 bitflags = "2"
 log = "0"
 lazy_static = { version = "1", features = ["spin_no_std"] }
+riscv = "0"
 spin = "0"
 
 

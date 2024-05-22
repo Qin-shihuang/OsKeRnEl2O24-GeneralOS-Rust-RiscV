@@ -1,7 +1,7 @@
 #![no_std]
 use core::arch::asm;
 
-
+pub mod hsm;
 pub mod base;
 pub mod legacy;
 
@@ -61,6 +61,7 @@ pub struct Sbiret {
     pub value: u64,
 }
 
+#[derive(PartialEq, Eq)]
 pub enum SbiError {
     SbiSuccess = 0,
     SbiErrFailed = -1,
@@ -72,4 +73,9 @@ pub enum SbiError {
     SbiErrAlreadyStarted = -7,
     SbiErrAlreadyStopped = -8,
     SbiErrNoShrem = -9
+}
+impl Sbiret {
+    pub fn is_success(&self) -> bool {
+        self.error == SbiError::SbiSuccess
+    }
 }

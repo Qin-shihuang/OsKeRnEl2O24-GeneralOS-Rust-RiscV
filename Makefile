@@ -23,7 +23,7 @@ run: build_release
     -device loader,file=kernel-qemu,addr=0x80200000 \
     -kernel kernel-qemu \
     -nographic \
-    -smp 4 -m 256M
+    -smp 4 -m 2G
 
 debug_run: build_debug
 	@qemu-system-riscv64 \
@@ -32,7 +32,7 @@ debug_run: build_debug
     -device loader,file=kernel-qemu,addr=0x80200000 \
     -kernel kernel-qemu \
     -nographic \
-    -smp 8 -m 256M \
+    -smp 8 -m 2G \
 
 debug: build_debug
 	@qemu-system-riscv64 \
@@ -41,7 +41,7 @@ debug: build_debug
     -device loader,file=kernel-qemu,addr=0x80200000 \
     -kernel kernel-qemu \
     -nographic \
-    -smp 8 -m 256M \
+    -smp 8 -m 2G \
     -s -S
     
 clean:

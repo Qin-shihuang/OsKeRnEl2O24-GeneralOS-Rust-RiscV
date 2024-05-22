@@ -3,6 +3,8 @@ use core::{fmt::{self, Display}, ops::{Add, AddAssign, Sub, SubAssign}};
 
 use crate::{mask, mm::consts::{PAGE_SIZE, PAGE_SIZE_BITS, PA_WIDTH}, round_up};
 
+use super::pa2kva;
+
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PhysAddr(pub usize);
 
@@ -65,6 +67,26 @@ impl PhysAddr {
 
     pub fn as_mut_ptr<T>(self) -> *mut T {
         self.0 as *mut T
+    }
+
+    pub unsafe fn as_slice(&self, len: usize) -> &[u8] {
+        let mapped_addr = pa2kva(*self);
+        core::slice::from_raw_parts(mapped_addr.0 as *const u8, len)
+    }
+
+    #[allow(clippy::mut_from_ref)]
+    pub unsafe fn as_mut_slice(&self, len: usize) -> &mut [u8] {
+        let mapped_addr = pa2kva(*self);
+        core::slice::from_raw_parts_mut(mapped_addr.0 as *mut u8, len)
+    }
+
+    pub unsafe fn as_page_slice(&self) -> &[u8] {
+        self.as_slice(PAGE_SIZE)
+    }
+
+    #[allow(clippy::mut_from_ref)]
+    pub unsafe fn as_mut_page_slice(&self) -> &mut [u8] {
+        self.as_mut_slice(PAGE_SIZE)
     }
 }
 

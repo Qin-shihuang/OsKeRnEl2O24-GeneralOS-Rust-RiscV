@@ -51,8 +51,8 @@ impl<const ORDER: usize> FrameAllocator<ORDER> {
         if size == 0 || align == 0 || size > self.total || align > self.total {
             return None;
         }
-        assert!(size.is_power_of_two());
-        assert!(align.is_power_of_two());
+        debug_assert!(size.is_power_of_two());
+        debug_assert!(align.is_power_of_two());
         let order = size.trailing_zeros() as usize;
         let align_order = align.trailing_zeros() as usize;
         let start_order = usize::max(order, align_order);
@@ -76,8 +76,8 @@ impl<const ORDER: usize> FrameAllocator<ORDER> {
     }
 
     pub fn dealloc(&mut self, start: PhysPageNum, size: usize) {
-        assert!(size.is_power_of_two());
-        assert!(start.0 & (size - 1) == 0);
+        debug_assert!(size.is_power_of_two());
+        debug_assert!(start.0 & (size - 1) == 0);
         let order = size.trailing_zeros() as usize;
         let mut ppn = start;
         let mut order = order;
@@ -155,4 +155,12 @@ pub fn alloc_frames(size: usize, align: usize) -> Option<PhysPageNum> {
 
 pub fn dealloc_frames(start: PhysPageNum, size: usize) {
     FRAME_ALLOCATOR.lock().dealloc(start, size);
+}
+
+pub fn alloc() -> Option<PhysPageNum> {
+    alloc_frames(1, 1)
+}
+
+pub fn dealloc(frame: PhysPageNum) {
+    dealloc_frames(frame, 1);
 }

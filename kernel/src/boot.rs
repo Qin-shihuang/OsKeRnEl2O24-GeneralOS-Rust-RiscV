@@ -2,6 +2,8 @@
 
 use core::arch::{asm, global_asm};
 
+use crate::mm::{addr::{kva2pa, PhysAddr, VirtAddr}, consts::PAGE_TABLE_ENTRY_COUNT};
+
 #[naked]
 #[link_section = ".init.boot"]
 #[export_name = "_low_entry"]
@@ -87,4 +89,12 @@ unsafe extern "C" fn set_boot_page_table(hartid: usize) {
 
 extern "C" {
     fn __boot_page_table_sv39();
+}
+
+pub fn boot_page_table_pa() -> PhysAddr {
+    kva2pa(VirtAddr(__boot_page_table_sv39 as usize))
+}
+
+pub fn boot_pagetable() -> &'static mut [usize] {
+    unsafe { core::slice::from_raw_parts_mut(boot_page_table_pa().0 as *mut _, PAGE_TABLE_ENTRY_COUNT) }
 }

@@ -25,14 +25,16 @@ mod macros;
 mod mm;
 mod panic;
 
-
-
 #[no_mangle]
 extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
     clear_bss();
     logging::init();
     display_banner();
-    info!("GeneralOS-Rust-RiscV srarted in hart_id: {}", hart_id);
+    info!(
+        "GeneralOS-Rust-RiscV srarted in hart {} with {} harts in total.",
+        hart_id,
+        arch::get_hart_count()
+    );
     mm::init();
     panic!()
 }
@@ -75,4 +77,3 @@ fn clear_bss() {
         );
     }
 }
-

@@ -1,16 +1,13 @@
-#![allow(dead_code)]
+#![allow(dead_code)] // TODO
 
 use alloc::vec::Vec;
 use lazy_static::lazy_static;
 use log::info;
 use spin::Mutex;
 
-use crate::{
-    mm::addr::{PhysAddr, PAGE_SIZE},
-    prev_pow_of_2, print, println,
-};
+use crate::{prev_pow_of_2, print, println};
 
-use super::addr::PhysPageNum;
+use super::addr::{PhysAddr, PhysPageNum, PAGE_SIZE};
 
 const ORDER: usize = 32;
 
@@ -35,17 +32,17 @@ impl<const ORDER: usize> FrameAllocator<ORDER> {
         }
     }
 
-    pub fn init(&mut self, start: usize, end: usize) {
-        assert!(start < end);
-        let start = PhysAddr(start).ceil();
-        let end = PhysAddr(end).floor();
+    pub fn init(&mut self, start: PhysAddr, end: PhysAddr) {
+        assert!(start.0 < end.0);
+        let start = start.ceil_page();
+        let end = end.floor_page();
         let mut current = start;
         while current < end {
             let lowbit = 1 << current.0.trailing_zeros();
             let size = usize::min(lowbit, prev_pow_of_2!(end.0 - current.0));
             let order = size.trailing_zeros() as usize;
             self.free_list[order].push(current);
-            current = PhysPageNum(current.0 + size);
+            current += size;
         }
         self.total = end.0 - start.0;
     }
@@ -144,9 +141,12 @@ pub fn debug_print() {
     FRAME_ALLOCATOR.lock().debug_print();
 }
 
-pub fn init(start: usize, end: usize) {
+pub fn init(start: PhysAddr, end: PhysAddr) {
     FRAME_ALLOCATOR.lock().init(start, end);
-    info!("Initialized frame allocator with {} frames in total.", FRAME_ALLOCATOR.lock().total);
+    info!(
+        "Initialized frame allocator with {} frames in total.",
+        FRAME_ALLOCATOR.lock().total
+    );
 }
 
 pub fn alloc_frames(size: usize, align: usize) -> Option<Frame> {

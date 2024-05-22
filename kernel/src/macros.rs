@@ -29,7 +29,7 @@ mod bitops {
     #[macro_export]
     macro_rules! round_up {
         ($n:expr, $align:expr) => {
-            (($n + $align - 1) & !($align - 1))
+            ($n + $align - 1) & !($align - 1)
         }
     }
 

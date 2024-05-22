@@ -27,3 +27,8 @@ pub fn init() {
         KERNEL_HEAP_SIZE / 1024
     );
 }
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: core::alloc::Layout) -> ! {
+    panic!("Heap allocation error: {:?}", layout)
+}

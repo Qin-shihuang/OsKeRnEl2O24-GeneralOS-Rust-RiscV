@@ -3,12 +3,15 @@ use core::ptr::addr_of;
 use alloc::vec::Vec;
 use log::debug;
 
-use crate::config::MEMORY_END;
+use crate::config::PHYSICAL_MEMORY_END;
+
+use self::addr::{kva2pa, PhysAddr, VirtAddr};
 
 pub mod addr;
 mod frame;
 mod heap;
 pub mod layout;
+mod paging;
 
 extern "C" {
     static __kernel_end: u8;
@@ -17,8 +20,11 @@ extern "C" {
 pub fn init() {
     heap::init();
     test_heap();
-    frame::init(unsafe { addr_of!(__kernel_end) as usize }, MEMORY_END);
-
+    frame::init(
+        kva2pa(VirtAddr(unsafe { addr_of!(__kernel_end) as usize })),
+        PhysAddr(PHYSICAL_MEMORY_END),
+    );
+    frame::debug_print();
 }
 
 fn test_heap() {

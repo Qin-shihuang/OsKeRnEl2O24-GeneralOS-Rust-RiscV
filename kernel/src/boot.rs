@@ -1,3 +1,5 @@
+// Adapted from Mankoros
+
 use core::arch::{asm, global_asm};
 
 #[naked]
@@ -81,4 +83,8 @@ unsafe extern "C" fn set_boot_page_table(hartid: usize) {
         options(noreturn),
     )
 
+}
+
+extern "C" {
+    fn __boot_page_table_sv39();
 }

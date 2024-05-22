@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![feature(alloc_error_handler)]
 #![feature(asm_const)]
 #![feature(panic_info_message)]
 #![feature(naked_functions)]

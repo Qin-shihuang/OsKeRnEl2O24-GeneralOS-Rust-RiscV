@@ -24,6 +24,8 @@ mod logging;
 mod macros;
 mod mm;
 mod panic;
+mod timer;
+mod trap;
 
 #[no_mangle]
 extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
@@ -36,7 +38,9 @@ extern "C" fn kernel_init(hart_id: usize, _dtb_pa: usize) -> ! {
         arch::get_hart_count()
     );
     mm::init();
-    panic!()
+    trap::init();
+    timer::init();
+    loop {}
 }
 
 fn display_banner() {
